@@ -60,6 +60,12 @@ namespace PoliceDep {
 	private: System::Windows::Forms::Button^  delete_btn;
 	private: System::Windows::Forms::ComboBox^  searchBox;
 	private: System::Windows::Forms::ListBox^  listBox;
+	private: System::Windows::Forms::Button^  updateButton;
+	private: System::Windows::Forms::TextBox^  id_txt;
+
+
+	private: System::Windows::Forms::Label^  idlbl;
+
 
 
 
@@ -96,6 +102,9 @@ namespace PoliceDep {
 			this->delete_btn = (gcnew System::Windows::Forms::Button());
 			this->searchBox = (gcnew System::Windows::Forms::ComboBox());
 			this->listBox = (gcnew System::Windows::Forms::ListBox());
+			this->updateButton = (gcnew System::Windows::Forms::Button());
+			this->id_txt = (gcnew System::Windows::Forms::TextBox());
+			this->idlbl = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// button1
@@ -110,7 +119,7 @@ namespace PoliceDep {
 			// 
 			// save_btn
 			// 
-			this->save_btn->Location = System::Drawing::Point(346, 217);
+			this->save_btn->Location = System::Drawing::Point(178, 150);
 			this->save_btn->Name = L"save_btn";
 			this->save_btn->Size = System::Drawing::Size(75, 23);
 			this->save_btn->TabIndex = 1;
@@ -207,11 +216,41 @@ namespace PoliceDep {
 			this->listBox->TabIndex = 16;
 			this->listBox->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm2::listBox_SelectedIndexChanged);
 			// 
+			// updateButton
+			// 
+			this->updateButton->Location = System::Drawing::Point(81, 150);
+			this->updateButton->Name = L"updateButton";
+			this->updateButton->Size = System::Drawing::Size(75, 23);
+			this->updateButton->TabIndex = 17;
+			this->updateButton->Text = L"Update";
+			this->updateButton->UseVisualStyleBackColor = true;
+			this->updateButton->Click += gcnew System::EventHandler(this, &MyForm2::updateButton_Click);
+			// 
+			// id_txt
+			// 
+			this->id_txt->Location = System::Drawing::Point(115, 28);
+			this->id_txt->Name = L"id_txt";
+			this->id_txt->Size = System::Drawing::Size(100, 20);
+			this->id_txt->TabIndex = 18;
+			// 
+			// idlbl
+			// 
+			this->idlbl->AutoSize = true;
+			this->idlbl->Location = System::Drawing::Point(54, 31);
+			this->idlbl->Name = L"idlbl";
+			this->idlbl->Size = System::Drawing::Size(18, 13);
+			this->idlbl->TabIndex = 19;
+			this->idlbl->Text = L"ID";
+			this->idlbl->Click += gcnew System::EventHandler(this, &MyForm2::label1_Click_2);
+			// 
 			// MyForm2
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(580, 261);
+			this->Controls->Add(this->idlbl);
+			this->Controls->Add(this->id_txt);
+			this->Controls->Add(this->updateButton);
 			this->Controls->Add(this->listBox);
 			this->Controls->Add(this->delete_btn);
 			this->Controls->Add(this->gender_lbl);
@@ -346,7 +385,7 @@ namespace PoliceDep {
 				Surname = myReader->GetString("Surname");
 				String^ Age;
 				Age = myReader->GetInt32("Age").ToString();
-				listBox->Items->Add(Name + ", " + Surname + ", " + Age);
+				listBox->Items->Add(Name);
 
 			}
 
@@ -392,6 +431,67 @@ namespace PoliceDep {
 
 
 private: System::Void listBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+	String^ listBoxVal = listBox->Text;
+	String^ constring = L"datasource=localhost;port=3306;username=root;password=global";
+	MySqlConnection^ conDatabase = gcnew MySqlConnection(constring);
+	MySqlCommand^ cmdDataBase = gcnew MySqlCommand("SELECT * FROM policedep.officers where name ='" + listBoxVal + "';", conDatabase);
+	MySqlDataReader^ myReader;
+
+	try
+	{
+		conDatabase->Open();
+		myReader = cmdDataBase->ExecuteReader();
+
+		if (myReader->Read())
+		{
+			String^ id = myReader->GetInt32("id").ToString();
+			id_txt->Text = id;
+			String^ name = myReader->GetString("Name");
+			name_txt->Text = name;
+			String^ surname = myReader->GetString("Surname");
+			surname_txt->Text = surname;
+			String^ age = myReader->GetInt32("age").ToString();
+			age_txt->Text = age;
+		}
+
+	}
+	catch (Exception^ex)
+	{
+		MessageBox::Show(ex->Message);
+	}
+}
+
+
+
+
+
+
+private: System::Void updateButton_Click(System::Object^  sender, System::EventArgs^  e) {
+	String^ constring = L"datasource=localhost;port=3306;username=root;password=global";
+	MySqlConnection^ conDatabase = gcnew MySqlConnection(constring);
+	MySqlCommand^ cmdDataBase = gcnew MySqlCommand("UPDATE policedep.officers set name ='" + this->name_txt->Text + "', surname = '" + this->surname_txt->Text + "', age = '" + this->age_txt->Text + "' where id='"+this->id_txt->Text+"' ;", conDatabase);
+	MySqlDataReader^ myReader;
+
+	try
+	{
+		conDatabase->Open();
+		myReader = cmdDataBase->ExecuteReader();
+		MessageBox::Show("Updated");
+
+		while (myReader->Read())
+		{
+
+
+		}
+
+
+	}
+	catch (Exception^ex)
+	{
+		MessageBox::Show(ex->Message);
+	}
+}
+private: System::Void label1_Click_2(System::Object^  sender, System::EventArgs^  e) {
 }
 };
 }
